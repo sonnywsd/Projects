@@ -1,0 +1,514 @@
+package SearchInterface;
+
+import java.awt.Desktop;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileReader;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.TreeMap;
+import java.util.Map.Entry;
+
+import javax.swing.*;
+import javax.swing.event.HyperlinkEvent;
+import javax.swing.event.HyperlinkListener;
+
+public class Search extends JFrame implements ActionListener {
+		//JFARAME VARIABLE
+		private static final long serialVersionUID = 1L;
+		private JEditorPane ed1; 
+	    protected JTextField textField;
+	    String textFieldValue;
+	    
+	    Map<Integer,String> idurl = new HashMap<Integer,String>();
+	    Map<String,Integer> urlid = new HashMap<String,Integer>();
+	    Map<Integer,String> idtitle = new HashMap<Integer,String>();
+    	Map<Integer,String> idanchor = new HashMap<Integer,String>();
+    	Map<Integer,Double> idrank = new HashMap<Integer,Double>();
+	    
+	    public Search() {
+	    	initdatamap();
+	    	initUI();
+	    }
+	    public final void initdatamap() {	
+	    	String text;
+	    	BufferedReader reader;
+			try {
+				//read url id file
+				File ifile = new File("data","Docid_URL.txt");
+				reader = new BufferedReader(new FileReader(ifile));
+				while ((text = reader.readLine()) != null) 
+				{
+					String [] words = text.toLowerCase().split("\\s+");
+					int id = Integer.parseInt(words[0]);
+					urlid.put(words[1].toLowerCase(),id);
+				}
+				
+				reader.close(); 
+			
+			} catch (IOException e) {
+				System.out.println("sadasd");
+			}
+			
+			try {
+				//read id url  file
+				File ifile = new File("data","Docid_URL.txt");
+				reader = new BufferedReader(new FileReader(ifile));
+				while ((text = reader.readLine()) != null) 
+				{
+					String [] words = text.toLowerCase().split("\\s+");
+					int id = Integer.parseInt(words[0]);
+					idurl.put(id, words[1].toLowerCase());
+				}
+				reader.close(); 
+			
+			} catch (IOException e) {
+				System.out.println("sadasd");
+			}
+			
+			try {			
+			//read id title  file
+			File ifile = new File("data","title.txt");
+			reader = new BufferedReader(new FileReader(ifile));
+			while ((text = reader.readLine()) != null) 
+			{
+				int id = Integer.parseInt(text.substring(0,text.indexOf(' '))); // "72"
+				String title = text.substring(text.indexOf(' ')+1);
+				idtitle.put(id, title);		
+			}
+			reader.close(); 
+		
+			} catch (IOException e) {
+			e.printStackTrace();
+			}
+			
+			try {			
+				//read id anchor  file
+				File ifile = new File("data","anchor.txt");
+				reader = new BufferedReader(new FileReader(ifile));
+				while ((text = reader.readLine()) != null) 
+				{
+					int id = Integer.parseInt(text.substring(0,text.indexOf(' '))); // "72"
+					String anchortext = text.substring(text.indexOf(' ')+1);
+					idanchor.put(id, anchortext);
+				}
+				reader.close(); 
+			
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+			
+			try {			
+				//read pagerank file
+				File ifile = new File("data","pagerank.txt");
+				reader = new BufferedReader(new FileReader(ifile));
+				while ((text = reader.readLine()) != null) 
+				{
+					String [] words = text.toLowerCase().split("\\s+");
+					
+					int id = Integer.parseInt(words[0]);
+					Double rank = Double.parseDouble(words[1]);
+					idrank.put(id, rank);
+				}
+				reader.close(); 
+			
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+			//System.gc();
+	    }
+	    //
+	    public final void initUI() {
+	        JPanel panel = new JPanel();
+	        panel.setLayout(null);
+
+	        ed1=new JEditorPane();
+	        textField = new JTextField(50);
+	        JButton okButton = new JButton("search");
+	        
+	        textField.setBounds(250, 35, 200, 25);
+	        okButton.setBounds(470, 35, 80, 25);
+	        ed1.setBounds(30, 60, 740, 490);
+	        
+	        okButton.addActionListener(this);
+
+	        panel.add(okButton);
+	        panel.add(textField);
+	        panel.add(ed1);
+	        add(panel);
+
+	        setTitle("Event object");
+	        setSize(800, 600);
+	        setLocationRelativeTo(null);
+	        setDefaultCloseOperation(EXIT_ON_CLOSE);
+	        
+	    }
+	    //show link list in html
+	    public void actionPerformed(ActionEvent e) {       
+	        textFieldValue = textField.getText();
+	        
+	        String html="<html><head><title>Simple Page</title></head>";
+	        html+="<body bgcolor='#777779'><hr/><font size=70>Search Result of: "+textField.getText()+ "</font><hr/>";
+	        html+="<br>";
+	        if(!textFieldValue.equals(""))
+	        {
+	        	rankedlink[] result = search_engine(textFieldValue);
+	        	
+		        for(int i=0;i<14;i++ )
+		        {
+		        	html+="<a href=";
+		        	html+=result[i].geturl();
+		        	html+=">"+(i+1)+". ";
+		        	html+=result[i].geturl()+"  Score:"+result[i].getscore(); //link and score
+		        	html+="</a>";
+		        	html+="<br>";
+		        	html+="<br>";
+		        }
+	        }
+	        else//no input
+	        	html+= "Please input search query";     
+	        html+="</body></html>";
+	        ed1.setContentType("text/html");
+	        ed1.setText(html);
+	       
+	        //set link
+	        ed1.setEditable(false);
+	        ed1.setOpaque(false);
+	        ed1.addHyperlinkListener(new HyperlinkListener() {
+	            @Override
+	            public void hyperlinkUpdate(HyperlinkEvent hle) {
+	                if (HyperlinkEvent.EventType.ACTIVATED.equals(hle.getEventType())) {
+	                    System.out.println(hle.getURL());
+	                    Desktop desktop = Desktop.getDesktop();
+	                    try {
+	                        desktop.browse(hle.getURL().toURI());
+	                    } catch (Exception ex) {
+	                        ex.printStackTrace();
+	                    }
+	                }
+	            }
+	        });
+	    }
+	    
+	    public rankedlink[] search_engine(String input)
+	    {
+	    	if(!functions.isUpper(input.replaceAll("\\s+","")))
+	    		input = input.toLowerCase();
+	    	String [] words = input.split("\\W");
+	    	ArrayList<String> urllist = new ArrayList<String>();
+	    	
+	    	Map<String, Double>frequencymap = new HashMap<String,Double>(); 
+	    	Map<String, ArrayList<Integer>> locationmap1 = new HashMap<String, ArrayList<Integer>>();
+	    	Map<String, ArrayList<Integer>> locationmap2 = new HashMap<String, ArrayList<Integer>>();
+	    	
+	    	Double tfsum,ranksum;
+	    	
+	    	searchsplittedword(words,0,frequencymap,locationmap1);
+	    	if(words.length==2)
+	    	{	
+	    		searchsplittedword(words,1,frequencymap,locationmap2);
+	    		upadtescorebytwogram(words,frequencymap,locationmap1,locationmap2);
+	    	}
+	    	//
+	    	tfsum =getfreqsum(frequencymap);
+	    	ranksum = getranksum(frequencymap);
+	    	for(Entry<String, Double> entry : frequencymap.entrySet())
+	    	{
+	    		Double rank = idrank.get(urlid.get(entry.getKey().toLowerCase()));
+	    		Double value  = frequencymap.get(entry.getKey());
+				if(rank ==null)
+				{
+					rank =0.0;
+					System.out.println(entry.getKey());
+				}
+	    		frequencymap.put(entry.getKey(),(value/tfsum)/(entry.getKey().length()/10) * rank);
+			}		
+	    	System.out.print("Finish tfidf");
+	    	ValueComparator bvc =  new ValueComparator(frequencymap);
+	        TreeMap<String,Double> treeMap = new TreeMap<String,Double>(bvc);
+	        treeMap.putAll(frequencymap);
+	        
+	       
+	    	if(words.length==1)
+	    	{ 
+	    		sortarraybyTAP1(treeMap,urllist,words[0]);
+	    	}
+	    	else
+	    	{
+	    		//use measurement to check relevant
+	    		
+	    		sortarraybyTAP2(treeMap,urllist,words);	
+	    	}
+	    	System.out.print("Finish tap");
+	    	rankedlink[] list = new rankedlink[urllist.size()];
+	    	
+	    	for(int i=0;i<urllist.size();i++)
+	    	{
+	    		
+	    		Double value  = frequencymap.get(urllist.get(i));
+				list[i] = new rankedlink(urllist.get(i),value);
+				
+	    	}
+	    	System.out.print("Finish ranklinklist");
+	    	return list;
+	    }
+	   
+	    
+	    
+	    public void searchsplittedword(String[] words,int i,Map<String, Double> frequencymap,Map<String, ArrayList<Integer>> locationmap)
+	    {
+	    	String filename = "TF-IDF"+words[i].toLowerCase().charAt(0)+".txt";
+    		File file = new File("final", filename);
+    		BufferedReader reader;
+    		//System.out.print(filename + words[i]);
+    		try {
+    			String text;
+	    		String [] matchedresult = null;
+    			reader = new BufferedReader(new FileReader(file));
+    			while ((text = reader.readLine()) != null) 
+    			{
+    				String [] tf = text.split("\\s+");
+    				if(tf[0].equals(words[i]))
+    				{
+    					matchedresult = tf;
+    					//System.out.print(text);
+    					break;
+    				}
+    			}
+    			if(matchedresult!=null)
+    			{
+    				ArrayList<String> tokenwords = new ArrayList<String>();
+    				for(int j=0;j<matchedresult.length;j++)
+    				{
+    					if(matchedresult[j].length()>0)
+    					{
+    						tokenwords.add(matchedresult[j]);
+    						//System.out.print("1"+matchedresult[j]+"1 ");
+    					}
+    				}
+    				int j=1;
+    				//count how many document contain this term
+    				int df=0;
+    				while(j<tokenwords.size())
+    				{
+    					if(!functions.isInteger(tokenwords.get(j))&& tokenwords.get(j).length()>0)
+    					{
+    						df++;
+    						j++;
+    					}
+    					j++;
+    				}	
+    				j=1;
+    				String url=tokenwords.get(j);
+    				while(j<tokenwords.size())
+    				{
+    					
+    					if(!functions.isInteger(tokenwords.get(j)) && tokenwords.get(j).length()>0)
+    					{
+    						url = tokenwords.get(j);
+    						Double count = frequencymap.get(url);
+    						if(count ==null)
+    							count =0.0;
+    						
+    						double addvalue = Integer.parseInt(tokenwords.get(j+1));
+    						
+    						addvalue = Math.log10(1+addvalue) * Math.log10(urlid.size()/df);
+    						
+    						
+    						frequencymap.put(tokenwords.get(j), count+addvalue);
+    						j++;
+    					}
+    					else if(functions.isInteger(tokenwords.get(j)))
+    					{
+    						ArrayList<Integer> list = locationmap.get(url);
+    						if(list==null)
+    							list = new ArrayList<Integer>();
+    						int addvalue = Integer.parseInt(tokenwords.get(j));
+    						list.add(addvalue);
+    						locationmap.put(url, list);
+    					}
+    					j++;
+    				}
+    			}
+    		}catch (IOException e) {
+    				e.printStackTrace();
+    		}
+	    }
+	  
+	    public void sortarraybyTAP1(Map<String,Double> frequencymap,ArrayList<String> urllist,String word)
+	    {
+	    	ArrayList<String> titleurllist = new ArrayList<String>();
+	    	ArrayList<String> anchorurllist = new ArrayList<String>();
+	    	ArrayList<String> termurllist = new ArrayList<String>();
+	    	
+	    	for(Entry<String, Double> entry : frequencymap.entrySet())
+	    	{
+
+	    		switch(checkTAP1(entry.getKey()))
+	    		{
+	    		case 2:
+	    			if(entry.getKey().contains("index"))
+	    				titleurllist.add(0,entry.getKey());
+	    			else
+	    				titleurllist.add(entry.getKey());
+	    			break;
+	    		case 1:
+	    			anchorurllist.add(entry.getKey());
+	    			break;
+	    		case 0:
+	    			termurllist.add(entry.getKey());
+	    			break;
+	    		}
+	    	}
+	    	urllist.addAll(titleurllist);
+	    	urllist.addAll(anchorurllist);
+	    	urllist.addAll(termurllist);
+	    }
+	    public int checkTAP1(String url)
+	    {
+	    	int id =urlid.get(url.toLowerCase());
+	    	String anchor,title;
+	    	anchor = idanchor.get(id);
+	    	title = idtitle.get(id);
+	    	if(!functions.isUpper(textFieldValue))
+	    	{
+	    		textFieldValue = textFieldValue.toLowerCase();
+	    		anchor = idanchor.get(id).toLowerCase();
+		    	title = idtitle.get(id).toLowerCase();
+	    	}
+	    	String word = textFieldValue;
+	    	
+	    	if(functions.checktitle(title,word))
+	    	{
+	    		return 2;
+	    	}
+	    	else if(functions.checktitle(anchor,word))
+	    		return 1;
+	    	else
+	    		return 0;
+	    }
+
+	    public void sortarraybyTAP2(Map<String,Double> frequencymap,ArrayList<String> urllist, String [] words)
+	    {
+	    	ArrayList<String> titleurllist = new ArrayList<String>();
+	    	ArrayList<String> anchorurllist = new ArrayList<String>();
+	    	ArrayList<String> termurllist = new ArrayList<String>();
+	    	
+	    	for(Entry<String, Double> entry : frequencymap.entrySet())
+	    	{		
+				switch(checkTAP2(entry.getKey(),words))
+	    		{
+	    		case 2:
+	    			titleurllist.add(entry.getKey());
+	    			break;
+	    		case 1:
+	    			anchorurllist.add(entry.getKey());
+	    			break;
+	    		case 0:
+	    			termurllist.add(entry.getKey());
+	    			break;
+	    		}
+				
+	    	}
+	    	urllist.addAll(titleurllist);
+	    	urllist.addAll(anchorurllist);
+	    	urllist.addAll(termurllist);
+	    }
+	    public int checkTAP2(String url,String[] words)
+	    {
+	    	int id =urlid.get(url.toLowerCase());
+	    	String anchor,title;
+	    	anchor = idanchor.get(id).toLowerCase();
+	    	title = idtitle.get(id).toLowerCase();
+			if(idtitle.get(id)==null)
+				title ="";
+			if(idanchor.get(id)==null)
+				anchor ="";
+			
+	    	if(title.contains(" "+words[0]+" "+words[1]+" ")
+	    			||title.contains(words[0]+" "+words[1]+" ")
+	    			||title.contains(" "+words[0]+" "+words[1]))
+	    	{
+//	    		/System.out.println(title+url);
+	    		return 2;
+	    		
+	    	}
+	    	else if(anchor.matches(".* "+words[0]+"([\\s+-]+)"+words[1]+" .*")
+	    			||anchor.matches(".* "+words[0]+"([\\s+-]+)"+words[1])
+	    			||anchor.matches(words[0]+"([\\s+-]+)"+words[1]+" .*"))
+	    		return 1;
+	    	else
+	    		return 0;
+	    }
+			
+	    public void upadtescorebytwogram(String[] words, Map<String, Double> frequencymap,Map<String, ArrayList<Integer>> locationmap1,Map<String, ArrayList<Integer>> locationmap2)
+	    {
+	    	for(Entry<String, ArrayList<Integer>> entry : locationmap1.entrySet()) 
+			{	//only works for two grams
+					ArrayList<Integer> word1 = entry.getValue();
+					ArrayList<Integer> word2 = locationmap2.get(entry.getKey());	
+		        	int num;
+					if(word1!=null && word2!=null)
+					{
+						num = functions.numoftwogram(words,word1, word2);
+						num = 10*num;
+						Double addvalue=  frequencymap.get(entry.getKey());
+		        		//System.out.print(entry.getKey());
+		        		if(addvalue == null)
+		        			addvalue =0.0;
+		        		addvalue +=Math.log10(1+num) * Math.log10(urlid.size()/frequencymap.size());;
+		        		frequencymap.put(entry.getKey(),addvalue);
+					}
+			}
+	    }
+	    
+	    
+	    public Double getfreqsum(Map<String, Double>frequencymap)
+	    {
+	    	Double sum =0.0;
+	    	for(Entry<String, Double> entry : frequencymap.entrySet())
+	    	{	
+	    		sum+=entry.getValue();
+	    		
+	    	}
+	    	return sum;
+	    	
+	    }
+	    public Double getranksum(Map<String, Double>frequencymap)
+	    {
+	    	Double sum =0.0;
+	    	for(Entry<String, Double> entry : frequencymap.entrySet())
+	    	{	
+	    		Double rank = idrank.get(urlid.get(entry.getKey().toLowerCase()));
+				if(rank ==null)
+				{
+					rank =0.0;
+					System.out.print("asd ");
+				}
+	    		sum+=rank;
+	    		
+	    	}
+	    	return sum;
+	    	
+	    }
+	    
+	    
+	    
+	    
+	    
+	    public static void main(String[] args) {
+	    	
+	    	SwingUtilities.invokeLater(new Runnable() {
+	        	
+	            public void run() {
+	                Search ex = new Search();
+	                ex.setVisible(true);
+	                
+	            }
+	        });
+	    }
+}
