@@ -1,0 +1,21 @@
+/*
+ * PageDirectory.h
+ *
+ *  Created on: 2014?10?12?
+ *      Author: sonnywsd
+ */
+
+#ifndef PAGEDIRECTORY_H_
+#define PAGEDIRECTORY_H_
+
+class PageDirectory {
+public:
+	PageDirectory();
+	virtual ~PageDirectory();
+
+	int getFirstPageWithEnoughSpace(FileHandle &fileHandle, int length);
+	int addPage(FileHandle &fileHandle);
+
+};
+
+#endif /* PAGEDIRECTORY_H_ */

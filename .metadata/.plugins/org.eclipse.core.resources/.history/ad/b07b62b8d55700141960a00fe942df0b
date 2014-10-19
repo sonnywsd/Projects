@@ -1,0 +1,17 @@
+/*
+ * A.h
+ *
+ *  Created on: 2014-10-19
+ *      Author: sonnywsd
+ */
+
+#ifndef A_H_
+#define A_H_
+
+class A {
+public:
+	A();
+	virtual ~A();
+};
+
+#endif /* A_H_ */

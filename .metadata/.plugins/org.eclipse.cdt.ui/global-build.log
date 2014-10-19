@@ -1,0 +1,50 @@
+
+**** Clean-only build of configuration Debug for project CS222 ****
+
+make clean 
+rm -rf  ./SRC/rbf/Page.o ./SRC/rbf/pfm.o ./SRC/rbf/rbfm.o ./SRC/rbf/rbftest.o  ./SRC/rbf/pfm.d ./SRC/rbf/rbfm.d ./SRC/rbf/rbftest.d  ./SRC/rbf/Page.d  CS222
+ 
+
+**** Build Finished ****
+
+**** Build of configuration Debug for project CS222 ****
+
+make all 
+Building file: ../SRC/rbf/Page.cpp
+Invoking: GCC C++ Compiler
+g++ -O0 -g3 -Wall -c -fmessage-length=0 -MMD -MP -MF"SRC/rbf/Page.d" -MT"SRC/rbf/Page.d" -o "SRC/rbf/Page.o" "../SRC/rbf/Page.cpp"
+Finished building: ../SRC/rbf/Page.cpp
+ 
+Building file: ../SRC/rbf/pfm.cc
+Invoking: GCC C++ Compiler
+g++ -O0 -g3 -Wall -c -fmessage-length=0 -MMD -MP -MF"SRC/rbf/pfm.d" -MT"SRC/rbf/pfm.d" -o "SRC/rbf/pfm.o" "../SRC/rbf/pfm.cc"
+Finished building: ../SRC/rbf/pfm.cc
+ 
+Building file: ../SRC/rbf/rbfm.cc
+Invoking: GCC C++ Compiler
+g++ -O0 -g3 -Wall -c -fmessage-length=0 -MMD -MP -MF"SRC/rbf/rbfm.d" -MT"SRC/rbf/rbfm.d" -o "SRC/rbf/rbfm.o" "../SRC/rbf/rbfm.cc"
+../SRC/rbf/rbfm.cc: In member function ‘RC RecordBasedFileManager::readRecord(FileHandle&, const std::vector<Attribute>&, const RID&, void*)’:
+../SRC/rbf/rbfm.cc:52:1: warning: no return statement in function returning non-void [-Wreturn-type]
+ }
+ ^
+Finished building: ../SRC/rbf/rbfm.cc
+ 
+Building file: ../SRC/rbf/rbftest.cc
+Invoking: GCC C++ Compiler
+g++ -O0 -g3 -Wall -c -fmessage-length=0 -MMD -MP -MF"SRC/rbf/rbftest.d" -MT"SRC/rbf/rbftest.d" -o "SRC/rbf/rbftest.o" "../SRC/rbf/rbftest.cc"
+Finished building: ../SRC/rbf/rbftest.cc
+ 
+Building target: CS222
+Invoking: GCC C++ Linker
+g++  -o "CS222"  ./SRC/rbf/Page.o ./SRC/rbf/pfm.o ./SRC/rbf/rbfm.o ./SRC/rbf/rbftest.o   
+Finished building target: CS222
+ 
+
+**** Build Finished ****
+
+**** Build of configuration Debug for project CS222 ****
+
+make all 
+make: 没有什么可以做的为 `all'。
+
+**** Build Finished ****

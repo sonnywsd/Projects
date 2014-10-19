@@ -1,0 +1,60 @@
+/*
+ * Record.cpp
+ *
+ *  Created on: 2014?10?12?
+ *      Author: sonnywsd
+ */
+
+#include "Record.h"
+
+Record::Record() {
+	// TODO Auto-generated constructor stub
+	recordstart = NULL;
+}
+Record::Record(char *data) {
+	// TODO Auto-generated constructor stub
+	recordstart = data;
+}
+
+Record::~Record() {
+	// TODO Auto-generated destructor stub
+}
+
+int Record::getrecordlength(vector<Attribute> recordDescriptor, char*data)
+{
+	int offset = 0;
+	int length;
+	int intValue = 0;
+	float realValue = 0;
+
+	for(int i = 0; i < (int)recordDescriptor.size(); i++){
+		switch(recordDescriptor[i].type){
+		        		case TypeInt:
+		        			length = sizeof(int);
+
+		        			offset += length;
+		        			break;
+		        		case TypeReal:
+		        			length = sizeof(float);
+
+		        			offset += length;
+		        			break;
+		        		case TypeVarChar:
+		        			memcpy(&length, data, sizeof(int));
+		        			offset += sizeof(int);
+		        			offset += length;
+		        			break;
+		        	}
+	}
+	return offset;
+}
+
+
+int Record::writerecord(vector<Attribute> recordDescriptor, char*data){
+	int length = (sizeof(int))*(2+recordDescriptor.size());
+	memcpy(recordstart+length,data, getrecordlength(recordDescriptor,data));
+
+	return 0;
+}
+
+

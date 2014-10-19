@@ -1,0 +1,18 @@
+/*
+ * A.cpp
+ *
+ *  Created on: 2014-10-19
+ *      Author: sonnywsd
+ */
+
+#include "A.h"
+
+A::A() {
+	// TODO Auto-generated constructor stub
+
+}
+
+A::~A() {
+	// TODO Auto-generated destructor stub
+}
+

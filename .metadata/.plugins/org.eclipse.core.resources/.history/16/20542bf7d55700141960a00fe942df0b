@@ -1,0 +1,25 @@
+/*
+ * Record.h
+ *
+ *  Created on: 2014?10?12?
+ *      Author: sonnywsd
+ */
+
+#ifndef RECORD_H_
+#define RECORD_H_
+
+#include "../rbfm.h"
+
+class Record {
+public:
+	Record();
+	Record(char *data);
+	virtual ~Record();
+
+	char *recordstart;
+
+	static int getrecordlength(vector<Attribute> recordDescriptor, char*data);
+	int writerecord(vector<Attribute> recordDescriptor, char*data);
+};
+
+#endif /* RECORD_H_ */

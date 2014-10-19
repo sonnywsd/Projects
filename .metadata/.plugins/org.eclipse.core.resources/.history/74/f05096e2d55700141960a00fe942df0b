@@ -1,0 +1,22 @@
+/*
+ * PageDirectory.cpp
+ *
+ *  Created on: 2014?10?12?
+ *      Author: sonnywsd
+ */
+
+#include "PageDirectory.h"
+
+PageDirectory::PageDirectory() {
+	// TODO Auto-generated constructor stub
+
+
+}
+
+PageDirectory::~PageDirectory() {
+	// TODO Auto-generated destructor stub
+}
+
+int PageDirectory::getFirstPageWithEnoughSpace(FileHandle &fileHandle, int length){
+
+}

@@ -1,0 +1,114 @@
+
+#include "rbfm.h"
+
+RecordBasedFileManager* RecordBasedFileManager::_rbf_manager = 0;
+
+RecordBasedFileManager* RecordBasedFileManager::instance()
+{
+    if(!_rbf_manager)
+        _rbf_manager = new RecordBasedFileManager();
+
+    return _rbf_manager;
+}
+
+RecordBasedFileManager::RecordBasedFileManager()
+{
+}
+
+RecordBasedFileManager::~RecordBasedFileManager()
+{
+}
+
+RC RecordBasedFileManager::createFile(const string &fileName) {
+    return PagedFileManager::instance()->createFile(fileName.c_str());
+}
+
+RC RecordBasedFileManager::destroyFile(const string &fileName) {
+    return PagedFileManager::instance()->destroyFile(fileName.c_str());
+}
+
+RC RecordBasedFileManager::openFile(const string &fileName, FileHandle &fileHandle) {
+    return PagedFileManager::instance()->openFile(fileName.c_str(),fileHandle);
+}
+
+RC RecordBasedFileManager::closeFile(FileHandle &fileHandle) {
+    return PagedFileManager::instance()->closeFile(fileHandle);
+}
+
+RC RecordBasedFileManager::insertRecord(FileHandle &fileHandle, const vector<Attribute> &recordDescriptor, const void *data, RID &rid) {
+	int recordlength = (Record:: getrecordlength(recordDescriptor, (char*)data)+2) * sizeof(int);
+	int slotNum;
+	char readpage[PAGE_SIZE],usedpage[PAGE_SIZE];
+
+		fileHandle.readPage(0, readpage);//where first page, store page directory
+
+		PageDirectory PD ;
+
+		int pageidwithfreespace = PD.getFirstPageWithEnoughSpace(fileHandle, recordlength);
+
+		if(pageidwithfreespace==-1)//no free page
+		{
+			pageidwithfreespace = PD.addPage(fileHandle);//add new page
+		}
+
+
+		fileHandle.readPage(pageidwithfreespace, usedpage);
+
+		Page insertRecordPage(usedpage);
+
+		Record rd (insertRecordPage.freespacestart);
+
+		slotNum = insertRecordPage.getslotNum();
+		rd.writerecord(recordDescriptor,(char*) data);
+		insertRecordPage.slotNum++;
+		insertRecordPage.freespacestart+=(Record:: getrecordlength(recordDescriptor, (char*)data)+2) * sizeof(int);
+		rid.pageNum = pageidwithfreespace;
+		rid.slotNum = slotNum;
+		return -1;
+}
+
+RC RecordBasedFileManager::readRecord(FileHandle &fileHandle, const vector<Attribute> &recordDescriptor, const RID &rid, void *data) {
+
+
+
+
+
+
+
+
+}
+
+RC RecordBasedFileManager::printRecord(const vector<Attribute> &recordDescriptor, const void *data) {
+    unsigned offset = 0;
+    unsigned len = 0;
+    int intValue = 0;
+    float realValue = 0;
+
+    for(int i = 0; i < (int)recordDescriptor.size(); i++){
+        	switch(recordDescriptor[i].type){
+        		case TypeInt:
+        			len = sizeof(int);
+        			memcpy(&intValue, (char *)data + offset, recordDescriptor[i].length);
+        			cout <<"Int "<< intValue << "\t" << flush;
+        			offset += len;
+        			break;
+        		case TypeReal:
+        			len = sizeof(float);
+        			memcpy(&realValue, (char *)data + offset, recordDescriptor[i].length);
+        			cout <<"Real "<< realValue << "\t" << flush;
+        			offset += len;
+        			break;
+        		case TypeVarChar:
+        			memcpy(&len, data, sizeof(int));
+        			offset += sizeof(unsigned);
+        			string s ((char *)data + offset, (char *)data + offset + len);
+        			s[len]='\0';
+        			cout << "String " << s << "\t"<< flush;
+        			offset += len;
+        			break;
+        	}
+        	cout<<" | ";
+        }
+
+	return -1;
+}
